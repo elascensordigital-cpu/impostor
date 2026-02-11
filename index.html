@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>El impostor</title>
+  <style>
+    :root{
+      --verm:#e34234;
+      --verm-dark:#c53328;
+      --bg:#ffffff;
+      --card:#ffffff;
+      --ink:#1b1b1b;
+      --muted:#6b6b6b;
+      --line: rgba(0,0,0,.10);
+      --shadow: 0 14px 34px rgba(0,0,0,.12);
+      --radius: 20px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 30% 0%, rgba(227,66,52,.10), transparent 55%),
+        radial-gradient(900px 600px at 85% 10%, rgba(227,66,52,.08), transparent 55%),
+        var(--bg);
+      min-height:100vh;
+    }
+    .app{
+      width:min(980px, 100%);
+      margin:0 auto;
+      padding:14px;
+      display:grid;
+      gap:12px;
+      padding-bottom: 88px; /* espacio para botones flotantes */
+    }
+
+    /* Cabecera: imagen ENTERA */
+    .header{
+      border-radius: var(--radius);
+      overflow:hidden;
+      box-shadow: var(--shadow);
+      border:1px solid var(--line);
+      background: var(--card);
+    }
+    .header img{
+      width:100%;
+      height:auto;
+      display:block;
+      object-fit:contain;
+      background:#ffffff;
+    }
+
+    /* Home: SOLO 3 botones */
+    .home{ display:grid; gap:12px; margin-top:4px; }
+    .btn{
+      appearance:none;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.80));
+      color:var(--ink);
+      padding:16px 16px;
+      border-radius: 22px;
+      font-weight:950;
+      cursor:pointer;
+      text-align:left;
+      box-shadow: 0 12px 26px rgba(0,0,0,.10);
+      transition: transform .08s ease, filter .15s ease;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      min-height:64px;
+    }
+    .btn:hover{ filter: brightness(1.02); }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn .left{ display:flex; align-items:center; gap:12px; }
+    .glyph{
+      width:44px;height:44px;
+      border-radius: 16px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(227,66,52,.30);
+      background: rgba(227,66,52,.10);
+      box-shadow: 0 10px 18px rgba(0,0,0,.08);
+      font-size:20px;
+    }
+    .btn.primary{
+      border-color: rgba(227,66,52,.45);
+      background: linear-gradient(180deg, rgba(227,66,52,.12), rgba(255,255,255,.85));
+    }
+    .btn.primary .glyph{
+      background: rgba(227,66,52,.16);
+      border-color: rgba(227,66,52,.45);
+    }
+
+    .count{
+      font-size:12px;
+      color:var(--muted);
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.75);
+      white-space:nowrap;
+    }
+
+    .warn{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius: 18px;
+      border:1px solid rgba(227,66,52,.35);
+      background: rgba(227,66,52,.10);
+      color: var(--verm-dark);
+      font-weight:900;
+      font-size:12px;
+    }
+    .warn.show{ display:block; }
+
+    /* Sheet */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.22);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      padding:12px;
+      z-index:50;
+    }
+    .overlay.show{ display:flex; }
+
+    .sheet{
+      width:min(740px, 100%);
+      background: var(--card);
+      border-radius: 26px;
+      border:1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .sheetHd{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 14px;
+      background: linear-gradient(180deg, rgba(227,66,52,.12), rgba(255,255,255,.90));
+      border-bottom:1px solid var(--line);
+    }
+    .sheetHd b{ font-size:14px; letter-spacing:.3px; font-weight:950; }
+    .sheetBd{ padding:14px; }
+
+    .iconBtn{
+      appearance:none;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.92);
+      color:var(--ink);
+      border-radius: 999px;
+      padding:8px 10px;
+      cursor:pointer;
+      box-shadow: 0 8px 18px rgba(0,0,0,.08);
+      display:inline-flex;
+      align-items:center;
+      font-weight:900;
+    }
+    .iconBtn:active{ transform: translateY(1px); }
+
+    input{
+      width:100%;
+      padding:12px 12px;
+      border-radius: 16px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.92);
+      outline:none;
+      font-weight:850;
+      color:var(--ink);
+    }
+    input:focus{ border-color: rgba(227,66,52,.45); }
+
+    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .row > *{ flex:1; }
+    .miniBtn{
+      appearance:none;
+      border:1px solid rgba(227,66,52,.40);
+      background: rgba(227,66,52,.12);
+      color:var(--ink);
+      border-radius: 16px;
+      padding:11px 12px;
+      cursor:pointer;
+      font-weight:950;
+      flex: 0 0 auto;
+      width:auto;
+      box-shadow: 0 10px 18px rgba(0,0,0,.08);
+    }
+    .miniBtn:active{ transform: translateY(1px); }
+
+    .hint{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+      font-weight:800;
+    }
+
+    .list{ margin-top:12px; display:grid; gap:8px; }
+    .chip{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:10px 12px;
+      border-radius: 18px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.88);
+    }
+    .chip span{
+      font-weight:950;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 520px;
+    }
+    .x{
+      appearance:none;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.92);
+      border-radius: 14px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-weight:900;
+    }
+    .x:hover{ border-color: rgba(227,66,52,.40); }
+
+    /* Juego */
+    .game{ display:none; margin-top:6px; }
+    .game.show{ display:block; }
+
+    .cardWrap{
+      border-radius: 26px;
+      border:1px solid rgba(227,66,52,.20);
+      background:
+        radial-gradient(700px 360px at 15% 20%, rgba(227,66,52,.10), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      box-shadow: var(--shadow);
+      padding:16px;
+    }
+
+    .flip{ perspective: 1400px; width:100%; }
+    .flipCard{
+      width:100%;
+      transform-style: preserve-3d;
+      transition: transform .55s cubic-bezier(.2,.8,.2,1);
+      position:relative;
+      border-radius: 26px;
+      min-height: 340px;
+      cursor:pointer;
+    }
+    .flipCard.flipped{ transform: rotateY(180deg); }
+
+    .face{
+      backface-visibility: hidden;
+      border-radius: 26px;
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      padding:18px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.92);
+      overflow:hidden;
+    }
+    .back{
+      transform: rotateY(180deg);
+      background: rgba(255,255,255,.94);
+    }
+
+    /* Carta final */
+    .starterFace{
+      background: linear-gradient(180deg, rgba(227,66,52,.96), rgba(197,51,40,.94));
+      border-color: rgba(255,255,255,.35);
+    }
+
+    .who{
+      display:grid;
+      gap:10px;
+      place-items:center;
+      text-align:center;
+      width:100%;
+    }
+
+    /* Nombre grande */
+    .name{
+      margin:0;
+      font-size: clamp(40px, 7.5vw, 64px);
+      font-weight: 1000;
+      letter-spacing: .5px;
+      line-height: 1.05;
+    }
+    .starterFace .name{
+      color:#ffffff;
+      text-shadow: 0 10px 22px rgba(0,0,0,.22);
+    }
+
+    /* Palabra discreta */
+    .wordRow{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+    }
+    .word{
+      margin:0;
+      font-size: clamp(18px, 3vw, 26px);
+      font-weight: 850;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(0,0,0,.52);
+      white-space: nowrap;
+    }
+
+    /* Iconos MUY grandes, traslúcidos pero reconocibles */
+    .emojiImg{
+      width:88px;
+      height:88px;
+      object-fit:contain;
+      opacity: .70; /* traslúcido pero visible */
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.18)) saturate(1.15) contrast(1.05);
+      transform: translateY(2px);
+    }
+
+    .sub{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:850;
+      margin-top:6px;
+      text-align:center;
+      padding: 0 10px;
+    }
+    .starterFace .sub{ color: rgba(255,255,255,.92); }
+
+    /* Botones flotantes: abajo derecha */
+    .fabWrap{
+      position:fixed;
+      right:14px;
+      bottom:14px;
+      display:flex;
+      gap:10px;
+      z-index:60;
+    }
+    .fab{
+      width:46px;
+      height:46px;
+      border-radius: 16px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 12px 26px rgba(0,0,0,.14);
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      font-size:20px;
+      user-select:none;
+    }
+    .fab:hover{ filter: brightness(1.02); }
+    .fab:active{ transform: translateY(1px); }
+    .fab.danger{
+      border-color: rgba(227,66,52,.35);
+      background: rgba(227,66,52,.10);
+    }
+
+    /* Anti-preview */
+    .secret{ visibility:hidden; }
+    .flipCard.flipped .secret{ visibility:visible; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="header">
+      <img src="cabecera.png" alt="Cabecera" />
+    </section>
+
+    <section class="home" id="home">
+      <button class="btn" id="btnPlayers">
+        <div class="left">
+          <div class="glyph">👥</div>
+          <div>Jugadores</div>
+        </div>
+        <span class="count" id="playersCount">0</span>
+      </button>
+
+      <button class="btn" id="btnImpostors">
+        <div class="left">
+          <div class="glyph">🕵️</div>
+          <div>Impostores</div>
+        </div>
+        <span class="count" id="impostorsCount">0</span>
+      </button>
+
+      <button class="btn primary" id="btnPlay">
+        <div class="left">
+          <div class="glyph">🎴</div>
+          <div>¡Jugar!</div>
+        </div>
+        <span class="count" id="readyBadge">—</span>
+      </button>
+
+      <div class="warn" id="warnBox"></div>
+    </section>
+
+    <section class="game" id="game">
+      <div class="cardWrap">
+        <div class="flip">
+          <div class="flipCard" id="flipCard" aria-label="Carta">
+            <div class="face front" id="frontFace">
+              <div class="who">
+                <h2 class="name" id="frontName">—</h2>
+                <div class="sub" id="frontSub">Toca para ver tu carta</div>
+              </div>
+            </div>
+
+            <div class="face back" id="backFace">
+              <div class="who">
+                <div class="wordRow secret" id="wordRow">
+                  <p class="word" id="wordText">—</p>
+                  <img class="emojiImg" id="emojiImg" src="sandia.png" alt="Sandía" />
+                </div>
+                <div class="sub secret">Toca para pasar al siguiente</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+          <button class="iconBtn" id="closeGameBtn">Cerrar</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Botones flotantes -->
+  <div class="fabWrap">
+    <button class="fab" id="helpBtn" title="Instrucciones">📖</button>
+    <button class="fab danger" id="resetBtn" title="Reset">↺</button>
+  </div>
+
+  <!-- SHEETS -->
+  <div class="overlay" id="overlay">
+    <div class="sheet" role="dialog" aria-modal="true">
+      <div class="sheetHd">
+        <b id="sheetTitle">—</b>
+        <button class="iconBtn" id="closeSheetBtn">Cerrar</button>
+      </div>
+      <div class="sheetBd" id="sheetBody"></div>
+    </div>
+  </div>
+
+  <script>
+    /**********************************************************
+     * Sustantivos CONCRETOS y CONTABLES (offline, 800+)
+     **********************************************************/
+    const NOUNS = [
+      "silla","mesa","sofá","cama","almohada","manta","sábana","cojín","armario","cajón","estante","lámpara","bombilla","interruptor","enchufe","cable","cargador","batería","pila","reloj","calendario","cuadro","marco","espejo","cortina","persiana","alfombra","felpudo","percha","tendedero","pinza","plancha","lavadora","secadora","nevera","horno","microondas","tostadora","batidora","cafetera","licuadora","exprimidor","sartén","olla","cacerola","cazuela","bandeja","molde","cuchillo","tenedor","cuchara","cucharón","espátula","pinza","colador","rallador","abridor","sacacorchos","plato","cuenco","vaso","taza","copa","jarra","botella","lata","tarro","frasco","tupper","fiambrera","servilleta","mantel","salero","azucarero","pimentero",
+      "puerta","ventana","pared","techo","suelo","escalón","escalera","pasillo","garaje","trastero","balcón","terraza","patio","jardín","maceta","regadera","manguera","pala","rastrillo","escoba","recogedor","trapo","esponja","cubo","cubeta","cepillo","peine","toalla","jabón","champú","crema","perfume","pasta","cepillo de dientes","maquinilla","cortaúñas",
+      "camisa","camiseta","pantalón","falda","vestido","chaqueta","abrigo","sudadera","jersey","pijama","calcetín","zapato","bota","zapatilla","gorra","sombrero","bufanda","guante","cinturón","hebilla","corbata","pajarita","bolso","mochila","maleta","cartera","monedero","llavero","llave","candado",
+      "libro","cuaderno","folio","carpeta","archivador","estuche","lápiz","bolígrafo","rotulador","subrayador","borrador","sacapuntas","regla","compás","tijera","pegamento","cinta","grapa","grapadora","clip","chincheta","pizarra","tiza","pincel","acuarela","lienzo","caballeta",
+      "móvil","teléfono","tablet","ordenador","portátil","pantalla","teclado","ratón","altavoz","auricular","cámara","trípode","mando","consola","router","impresora","escáner","disco","pendrive",
+      "coche","camión","moto","bicicleta","patinete","autobús","taxi","tren","metro","tranvía","barco","avión","helicóptero","caravana","carrito","remolque",
+      "calle","avenida","acera","esquina","puente","túnel","rotonda","semáforo","señal","farola","banco","papelera","kiosco","parada","andén","estación","aeropuerto","puerto","muelle",
+      "casa","piso","apartamento","edificio","bloque","portal","ascensor","tienda","supermercado","panadería","carnicería","pescadería","frutería","farmacia","hospital","clínica","escuela","instituto","universidad","biblioteca","museo","teatro","cine","restaurante","cafetería","bar","hotel","gimnasio","piscina","estadio","parque","plaza","mercado",
+      "árbol","pino","roble","olivo","palmera","arbusto","rama","hoja","flor","rosa","tulipán","lirio","girasol","margarita","pétalo","ramo","piña","cono","piedra","roca","montaña","colina","valle","isla","costa","bahía","acantilado","cueva","cascada","volcán","duna","nube","estrella","luna","sol",
+      "perro","gato","conejo","hámster","caballo","vaca","toro","oveja","cabra","cerdo","burro","gallina","pato","ganso","pavo","paloma","loro","canario","águila","búho","cuervo","cisne","pingüino","delfín","ballena","foca","tiburón","pez","pulpo","calamar","gamba","cangrejo","mejillón","ostra","tortuga","lagarto","serpiente","rana","sapo","cocodrilo","zorro","lobo","oso","ciervo","jabalí","ardilla","nutria","mapache","jirafa","elefante","león","tigre","cebra","rinoceronte","hipopótamo","mono","gorila","chimpancé","canguro","koala","panda","camello","llama","alpaca","bisonte","erizo","topo","ratón","murciélago",
+      "abeja","avispa","hormiga","mariposa","escarabajo","grillo","saltamontes","mosca","mosquito","araña","caracol",
+      "manzana","pera","plátano","naranja","limón","mandarina","uva","cereza","ciruela","melocotón","albaricoque","kiwi","mango","papaya","piña","coco","granada","higo","dátil",
+      "tomate","patata","cebolla","ajo","pimiento","zanahoria","pepino","lechuga","espinaca","brócoli","coliflor","repollo","apio","calabacín","berenjena","calabaza","rábano","remolacha","seta","champiñón",
+      "almendra","nuez","avellana","castaña","pistacho","cacahuete","aceituna",
+      "huevo","queso","yogur","galleta","bizcocho","tarta","caramelo","chicle","piruleta","gominola","bocadillo","hamburguesa","pizza","taco","empanada","croqueta","salchicha",
+      "pelota","balón","raqueta","pala","casco","guante","red","portería","canasta","silbato","cronómetro","medalla","trofeo",
+      "guitarra","piano","violín","trompeta","tambor","flauta","micrófono","altavoz","foco","telón",
+      "martillo","clavo","tornillo","tuerca","destornillador","taladro","sierra","alicate","llave inglesa","cinta métrica","nivel","cincel","lima",
+      "botiquín","venda","gasa","tirita","termómetro","jeringa","muleta","camilla",
+      /* extra */
+      "cuna","trona","babero","biberón","chupete","sonajero","muñeca","muñeco","juguete","cometa","trompo","canica","dado","ficha","tablero","naipes",
+      "sillón","taburete","banco","mesilla","cómoda","vitrina","biombo","perchero","estantería","escritorio",
+      "pomo","bisagra","cerradura","pestillo","pasador","cadena","cuerda","soga","nudo",
+      "brújula","mapa","atlas","globo","lupa","prismático","telescopio","microscopio",
+      "patín","trineo","remo","ancla","timón","boya","chaleco salvavidas",
+      "retrovisor","volante","rueda","freno","pedal","asiento","maletero","parachoques","limpiaparabrisas",
+      "entrada","butaca","cartel","póster","revista","periódico","sobre","carta","postal","sello","buzón",
+      "cesta","canasta","cajita","paquete","etiqueta","ticket","moneda","billete",
+      "taza medidora","cuchara medidora","termómetro de cocina","tabla","tabla de cortar","mortero","mano de mortero",
+      "delantal","guante de horno","posavasos"
+    ];
+
+    const state = {
+      players: [], // { name }
+      impostors: 0,
+      game: null
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function setWarn(msg){
+      const box = $("warnBox");
+      if(!msg){ box.classList.remove("show"); box.textContent=""; return; }
+      box.textContent = msg;
+      box.classList.add("show");
+    }
+
+    function updateBadges(){
+      $("playersCount").textContent = state.players.length;
+      $("impostorsCount").textContent = state.impostors;
+      const ready = (state.players.length >= 3 && state.impostors >= 1 && state.impostors < state.players.length)
+        ? "listo" : "—";
+      $("readyBadge").textContent = ready;
+    }
+
+    function shuffle(arr){
+      const a = arr.slice();
+      for(let i=a.length-1; i>0; i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function pickWord(){
+      const list = NOUNS.filter(w => w && typeof w === "string" && w.trim().length > 0);
+      return list[Math.floor(Math.random()*list.length)].trim();
+    }
+
+    function clampImpostors(){
+      const max = Math.max(0, state.players.length - 1);
+      if(state.impostors > max) state.impostors = max;
+      if(state.impostors < 0) state.impostors = 0;
+    }
+
+    /* Sheets */
+    function openSheet(title, bodyEl){
+      $("sheetTitle").textContent = title;
+      const body = $("sheetBody");
+      body.innerHTML = "";
+      body.appendChild(bodyEl);
+      $("overlay").classList.add("show");
+      setWarn("");
+    }
+    function closeSheet(){
+      $("overlay").classList.remove("show");
+      updateBadges();
+    }
+
+    function playersSheet(){
+      const wrap = document.createElement("div");
+
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <input id="playerInput" type="text" maxlength="22" placeholder="Nombre (ej: Ana)" />
+        <button class="miniBtn" id="addBtn">Añadir</button>
+      `;
+      wrap.appendChild(row);
+
+      const hint = document.createElement("div");
+      hint.className = "hint";
+      hint.textContent = "Añade mínimo 3 jugadores.";
+      wrap.appendChild(hint);
+
+      const list = document.createElement("div");
+      list.className = "list";
+      wrap.appendChild(list);
+
+      function renderList(){
+        clampImpostors();
+        list.innerHTML = "";
+        if(state.players.length === 0){
+          const empty = document.createElement("div");
+          empty.className = "hint";
+          empty.textContent = "No hay jugadores aún.";
+          list.appendChild(empty);
+          return;
+        }
+        state.players.forEach((p, idx) => {
+          const chip = document.createElement("div");
+          chip.className = "chip";
+
+          const nameSpan = document.createElement("span");
+          nameSpan.textContent = p.name;
+
+          const del = document.createElement("button");
+          del.className = "x";
+          del.type = "button";
+          del.textContent = "Borrar";
+          del.onclick = () => { state.players.splice(idx,1); renderList(); updateBadges(); };
+
+          chip.appendChild(nameSpan);
+          chip.appendChild(del);
+          list.appendChild(chip);
+        });
+      }
+
+      function add(){
+        const inp = wrap.querySelector("#playerInput");
+        let name = (inp.value||"").trim().replace(/\s+/g," ");
+        if(!name) return;
+        if(state.players.some(p => p.name === name)) return;
+        state.players.push({ name });
+        inp.value = "";
+        renderList();
+        updateBadges();
+      }
+
+      wrap.querySelector("#addBtn").onclick = add;
+      wrap.querySelector("#playerInput").addEventListener("keydown", (e)=>{ if(e.key==="Enter") add(); });
+
+      renderList();
+      openSheet("Jugadores", wrap);
+      setTimeout(()=>wrap.querySelector("#playerInput")?.focus(), 0);
+    }
+
+    function impostorsSheet(){
+      const wrap = document.createElement("div");
+      const max = Math.max(0, state.players.length - 1);
+
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `<input id="impInput" type="number" min="0" max="${max}" step="1" value="${state.impostors}" />`;
+      wrap.appendChild(row);
+
+      const hint = document.createElement("div");
+      hint.className = "hint";
+      hint.textContent = `Máximo: ${max} (debe ser menor que jugadores).`;
+      wrap.appendChild(hint);
+
+      const inp = row.querySelector("#impInput");
+      inp.addEventListener("input", () => {
+        state.impostors = parseInt(inp.value,10) || 0;
+        clampImpostors();
+        inp.value = state.impostors;
+        updateBadges();
+      });
+
+      openSheet("Impostores", wrap);
+      setTimeout(()=>inp.focus(), 0);
+    }
+
+    function instructionsSheet(){
+      const wrap = document.createElement("div");
+
+      const story = document.createElement("div");
+      story.className = "hint";
+      story.innerHTML = `
+        <div style="font-weight:950;color:var(--ink);margin-bottom:8px;">
+          📖 Historia rápida
+        </div>
+        En una fiesta del <b>Club de Campo de las Sandías más exquisitas</b>, alguien ha entrado por el
+        <b>muro de atrás</b>. No es socio. No trae invitación. Y viene a colarse entre vosotros.
+        <br><br>
+        Vuestra misión: hablar lo justo para entenderos… y <b>descubrir al impostor</b> antes de que él adivine la palabra.
+      `;
+      wrap.appendChild(story);
+
+      const rules = document.createElement("div");
+      rules.className = "hint";
+      rules.innerHTML = `
+        <div style="font-weight:950;color:var(--ink);margin:14px 0 8px;">📜 Reglas</div>
+        <b>1.</b> Introduce los <b>jugadores</b>.<br>
+        <b>2.</b> Indica cuántos <b>impostores</b> habrá.<br>
+        <b>3.</b> Pasad el móvil uno a uno. Cada jugador toca su carta y ve su mensaje:
+        los jugadores ven una <b>palabra</b> + <b>sandía</b>, el impostor solo ve <b>IMPOSTOR</b> + su icono.<br>
+        <b>4.</b> Empieza quien indique la app, y se sigue en el sentido de las agujas del reloj. ⏱️<br>
+        <b>5.</b> En tu turno, di una palabra relacionada con la palabra secreta… pero <b>no demasiado obvia</b>,
+        para que el impostor no la adivine a la primera.<br>
+        <b>6.</b> El impostor debe <b>evitar ser identificado</b>: dirá una palabra “farol” guiándose por lo que escucha.<br>
+        <b>7.</b> Tras la 1ª ronda, en la cuenta de 3, todos señalan al sospechoso. Si el más votado es impostor, queda eliminado.
+        Si solo había 1 impostor, el juego termina. Si había más, continuáis.<br>
+        <b>8.</b> Desde la 2ª ronda, el impostor puede gastar su turno para decir:
+        <i>“Soy el impostor y creo que la palabra es…”</i>. Si acierta, gana. Si falla, queda delatado y pierde.
+        Si quedan más impostores, el juego sigue.
+      `;
+      wrap.appendChild(rules);
+
+      openSheet("Instrucciones", wrap);
+    }
+
+    /* Juego */
+    function canStart(){
+      if(state.players.length < 3){ setWarn("Añade al menos 3 jugadores."); return false; }
+      if(state.impostors < 1){ setWarn("Pon al menos 1 impostor."); return false; }
+      if(state.impostors >= state.players.length){ setWarn("Impostores < jugadores."); return false; }
+      return true;
+    }
+
+    function startGame(){
+      if(!canStart()) return;
+
+      const order = shuffle(state.players);
+      const word = pickWord();
+      const idxs = shuffle(order.map((_,i)=>i)).slice(0, state.impostors);
+      const impostorSet = new Set(idxs);
+
+      state.game = {
+        phase: "deal", // "deal" | "starter"
+        order,
+        word,
+        impostorSet,
+        idx: 0,
+        flipped: false,
+        starter: null
+      };
+
+      $("home").style.display = "none";
+      $("game").classList.add("show");
+      renderFront();
+    }
+
+    function setStarterMode(on){
+      const front = $("frontFace");
+      if(on) front.classList.add("starterFace");
+      else front.classList.remove("starterFace");
+    }
+
+    function clearBackSensitive(){
+      $("wordText").textContent = "—";
+      $("emojiImg").src = "sandia.png";
+      $("emojiImg").alt = "Sandía";
+    }
+
+    function renderFront(){
+      const g = state.game;
+      if(!g) return;
+
+      $("flipCard").classList.remove("flipped");
+      g.flipped = false;
+      clearBackSensitive();
+
+      if(g.phase === "deal"){
+        setStarterMode(false);
+
+        const total = g.order.length;
+        const i = g.idx;
+
+        if(i >= total){
+          g.phase = "starter";
+          g.starter = g.order[Math.floor(Math.random() * total)];
+          renderFront();
+          return;
+        }
+
+        const p = g.order[i];
+        $("frontName").textContent = p.name;
+        $("frontSub").textContent = "Toca para ver tu carta";
+        return;
+      }
+
+      if(g.phase === "starter"){
+        setStarterMode(true);
+        const p = g.starter;
+        $("frontName").textContent = p.name;
+        $("frontSub").textContent = "Empieza la partida (toca para cerrar)";
+      }
+    }
+
+    function renderBackOnFlip(){
+      const g = state.game;
+      if(!g || g.phase !== "deal") return;
+
+      const i = g.idx;
+      const isImp = g.impostorSet.has(i);
+
+      $("wordText").textContent = isImp ? "IMPOSTOR" : g.word;
+      $("emojiImg").src = isImp ? "impostor.png" : "sandia.png";
+      $("emojiImg").alt = isImp ? "Impostor" : "Sandía";
+    }
+
+    function flipOrNext(){
+      const g = state.game;
+      if(!g) return;
+
+      if(g.phase === "starter"){
+        closeGame();
+        return;
+      }
+
+      const card = $("flipCard");
+      if(!g.flipped){
+        renderBackOnFlip();
+        card.classList.add("flipped");
+        g.flipped = true;
+      }else{
+        g.idx += 1;
+        renderFront();
+      }
+    }
+
+    function closeGame(){
+      state.game = null;
+      $("game").classList.remove("show");
+      $("home").style.display = "grid";
+      setWarn("");
+      updateBadges();
+      setStarterMode(false);
+    }
+
+    function resetAll(){
+      state.players = [];
+      state.impostors = 0;
+      state.game = null;
+      $("game").classList.remove("show");
+      $("home").style.display = "grid";
+      setWarn("");
+      clampImpostors();
+      updateBadges();
+      setStarterMode(false);
+      // cierra overlays si estuvieran
+      $("overlay").classList.remove("show");
+    }
+
+    /* Eventos */
+    $("btnPlayers").onclick = playersSheet;
+    $("btnImpostors").onclick = impostorsSheet;
+    $("btnPlay").onclick = startGame;
+
+    $("helpBtn").onclick = instructionsSheet;
+    $("resetBtn").onclick = resetAll;
+
+    $("closeSheetBtn").onclick = closeSheet;
+    $("overlay").addEventListener("click", (e)=>{ if(e.target === $("overlay")) closeSheet(); });
+
+    $("flipCard").addEventListener("click", flipOrNext);
+    $("closeGameBtn").onclick = closeGame;
+
+    clampImpostors();
+    updateBadges();
+  </script>
+</body>
+</html>
