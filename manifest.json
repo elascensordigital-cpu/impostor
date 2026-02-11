@@ -1,0 +1,28 @@
+{
+  "name": "El impostor",
+  "short_name": "Impostor",
+  "description": "Mini juego offline para fiestas: reparte una palabra a todos menos a los impostores. Pasad el móvil, jugad por turnos y descubrid quién se coló en el club de las sandías.",
+  "id": "/",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#e34234",
+  "orientation": "portrait",
+  "categories": ["games", "entertainment"],
+  "lang": "es-ES",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
