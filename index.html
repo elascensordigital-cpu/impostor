@@ -4,8 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>El impostor</title>
+
+  <!-- PWA -->
   <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#e34234">
+  <meta name="theme-color" content="#e34234">
+
   <style>
     :root{
       --verm:#e34234;
@@ -36,10 +39,9 @@
       padding:14px;
       display:grid;
       gap:12px;
-      padding-bottom: 88px; /* espacio para botones flotantes */
+      padding-bottom: 88px;
     }
 
-    /* Cabecera: imagen ENTERA */
     .header{
       border-radius: var(--radius);
       overflow:hidden;
@@ -55,7 +57,6 @@
       background:#ffffff;
     }
 
-    /* Home: SOLO 3 botones */
     .home{ display:grid; gap:12px; margin-top:4px; }
     .btn{
       appearance:none;
@@ -121,7 +122,6 @@
     }
     .warn.show{ display:block; }
 
-    /* Sheet */
     .overlay{
       position:fixed; inset:0;
       background: rgba(0,0,0,.22);
@@ -231,7 +231,6 @@
     }
     .x:hover{ border-color: rgba(227,66,52,.40); }
 
-    /* Juego */
     .game{ display:none; margin-top:6px; }
     .game.show{ display:block; }
 
@@ -274,7 +273,6 @@
       background: rgba(255,255,255,.94);
     }
 
-    /* Carta final */
     .starterFace{
       background: linear-gradient(180deg, rgba(227,66,52,.96), rgba(197,51,40,.94));
       border-color: rgba(255,255,255,.35);
@@ -288,7 +286,6 @@
       width:100%;
     }
 
-    /* Nombre grande */
     .name{
       margin:0;
       font-size: clamp(40px, 7.5vw, 64px);
@@ -301,13 +298,7 @@
       text-shadow: 0 10px 22px rgba(0,0,0,.22);
     }
 
-    /* Palabra discreta */
-    .wordRow{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:18px;
-    }
+    /* La palabra se ve discreta, sin iconos al lado */
     .word{
       margin:0;
       font-size: clamp(18px, 3vw, 26px);
@@ -316,16 +307,6 @@
       text-transform: uppercase;
       color: rgba(0,0,0,.52);
       white-space: nowrap;
-    }
-
-    /* Iconos MUY grandes, traslúcidos pero reconocibles */
-    .emojiImg{
-      width:88px;
-      height:88px;
-      object-fit:contain;
-      opacity: .70; /* traslúcido pero visible */
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,.18)) saturate(1.15) contrast(1.05);
-      transform: translateY(2px);
     }
 
     .sub{
@@ -338,7 +319,6 @@
     }
     .starterFace .sub{ color: rgba(255,255,255,.92); }
 
-    /* Botones flotantes: abajo derecha */
     .fabWrap{
       position:fixed;
       right:14px;
@@ -367,7 +347,6 @@
       background: rgba(227,66,52,.10);
     }
 
-    /* Anti-preview */
     .secret{ visibility:hidden; }
     .flipCard.flipped .secret{ visibility:visible; }
   </style>
@@ -387,17 +366,19 @@
         <span class="count" id="playersCount">0</span>
       </button>
 
+      <!-- Icono PIZZA para impostores -->
       <button class="btn" id="btnImpostors">
         <div class="left">
-          <div class="glyph">🕵️</div>
+          <div class="glyph">🍕</div>
           <div>Impostores</div>
         </div>
         <span class="count" id="impostorsCount">0</span>
       </button>
 
+      <!-- Icono SANDÍA para jugar -->
       <button class="btn primary" id="btnPlay">
         <div class="left">
-          <div class="glyph">🎴</div>
+          <div class="glyph">🍉</div>
           <div>¡Jugar!</div>
         </div>
         <span class="count" id="readyBadge">—</span>
@@ -419,10 +400,8 @@
 
             <div class="face back" id="backFace">
               <div class="who">
-                <div class="wordRow secret" id="wordRow">
-                  <p class="word" id="wordText">—</p>
-                  <img class="emojiImg" id="emojiImg" src="sandia.png" alt="Sandía" />
-                </div>
+                <!-- SIN iconos junto a la palabra -->
+                <p class="word secret" id="wordText">—</p>
                 <div class="sub secret">Toca para pasar al siguiente</div>
               </div>
             </div>
@@ -436,13 +415,11 @@
     </section>
   </div>
 
-  <!-- Botones flotantes -->
   <div class="fabWrap">
     <button class="fab" id="helpBtn" title="Instrucciones">📖</button>
     <button class="fab danger" id="resetBtn" title="Reset">↺</button>
   </div>
 
-  <!-- SHEETS -->
   <div class="overlay" id="overlay">
     <div class="sheet" role="dialog" aria-modal="true">
       <div class="sheetHd">
@@ -454,9 +431,6 @@
   </div>
 
   <script>
-    /**********************************************************
-     * Sustantivos CONCRETOS y CONTABLES (offline, 800+)
-     **********************************************************/
     const NOUNS = [
       "silla","mesa","sofá","cama","almohada","manta","sábana","cojín","armario","cajón","estante","lámpara","bombilla","interruptor","enchufe","cable","cargador","batería","pila","reloj","calendario","cuadro","marco","espejo","cortina","persiana","alfombra","felpudo","percha","tendedero","pinza","plancha","lavadora","secadora","nevera","horno","microondas","tostadora","batidora","cafetera","licuadora","exprimidor","sartén","olla","cacerola","cazuela","bandeja","molde","cuchillo","tenedor","cuchara","cucharón","espátula","pinza","colador","rallador","abridor","sacacorchos","plato","cuenco","vaso","taza","copa","jarra","botella","lata","tarro","frasco","tupper","fiambrera","servilleta","mantel","salero","azucarero","pimentero",
       "puerta","ventana","pared","techo","suelo","escalón","escalera","pasillo","garaje","trastero","balcón","terraza","patio","jardín","maceta","regadera","manguera","pala","rastrillo","escoba","recogedor","trapo","esponja","cubo","cubeta","cepillo","peine","toalla","jabón","champú","crema","perfume","pasta","cepillo de dientes","maquinilla","cortaúñas",
@@ -472,58 +446,37 @@
       "manzana","pera","plátano","naranja","limón","mandarina","uva","cereza","ciruela","melocotón","albaricoque","kiwi","mango","papaya","piña","coco","granada","higo","dátil",
       "tomate","patata","cebolla","ajo","pimiento","zanahoria","pepino","lechuga","espinaca","brócoli","coliflor","repollo","apio","calabacín","berenjena","calabaza","rábano","remolacha","seta","champiñón",
       "almendra","nuez","avellana","castaña","pistacho","cacahuete","aceituna",
-      "huevo","queso","yogur","galleta","bizcocho","tarta","caramelo","chicle","piruleta","gominola","bocadillo","hamburguesa","pizza","taco","empanada","croqueta","salchicha",
-      "pelota","balón","raqueta","pala","casco","guante","red","portería","canasta","silbato","cronómetro","medalla","trofeo",
-      "guitarra","piano","violín","trompeta","tambor","flauta","micrófono","altavoz","foco","telón",
-      "martillo","clavo","tornillo","tuerca","destornillador","taladro","sierra","alicate","llave inglesa","cinta métrica","nivel","cincel","lima",
-      "botiquín","venda","gasa","tirita","termómetro","jeringa","muleta","camilla",
-      /* extra */
-      "cuna","trona","babero","biberón","chupete","sonajero","muñeca","muñeco","juguete","cometa","trompo","canica","dado","ficha","tablero","naipes",
-      "sillón","taburete","banco","mesilla","cómoda","vitrina","biombo","perchero","estantería","escritorio",
-      "pomo","bisagra","cerradura","pestillo","pasador","cadena","cuerda","soga","nudo",
-      "brújula","mapa","atlas","globo","lupa","prismático","telescopio","microscopio",
-      "patín","trineo","remo","ancla","timón","boya","chaleco salvavidas",
-      "retrovisor","volante","rueda","freno","pedal","asiento","maletero","parachoques","limpiaparabrisas",
-      "entrada","butaca","cartel","póster","revista","periódico","sobre","carta","postal","sello","buzón",
-      "cesta","canasta","cajita","paquete","etiqueta","ticket","moneda","billete",
-      "taza medidora","cuchara medidora","termómetro de cocina","tabla","tabla de cortar","mortero","mano de mortero",
-      "delantal","guante de horno","posavasos"
+      "huevo","queso","yogur","galleta","bizcocho","tarta","caramelo","chicle","piruleta","gominola","bocadillo","hamburguesa","pizza","taco","empanada","croqueta","salchicha"
     ];
 
-    const state = {
-      players: [], // { name }
-      impostors: 0,
-      game: null
-    };
-
+    const state = { players: [], impostors: 0, game: null };
     const $ = (id) => document.getElementById(id);
 
     function setWarn(msg){
       const box = $("warnBox");
       if(!msg){ box.classList.remove("show"); box.textContent=""; return; }
-      box.textContent = msg;
-      box.classList.add("show");
+      box.textContent = msg; box.classList.add("show");
     }
 
     function updateBadges(){
       $("playersCount").textContent = state.players.length;
       $("impostorsCount").textContent = state.impostors;
-      const ready = (state.players.length >= 3 && state.impostors >= 1 && state.impostors < state.players.length)
+      $("readyBadge").textContent =
+        (state.players.length >= 3 && state.impostors >= 1 && state.impostors < state.players.length)
         ? "listo" : "—";
-      $("readyBadge").textContent = ready;
     }
 
     function shuffle(arr){
       const a = arr.slice();
-      for(let i=a.length-1; i>0; i--){
+      for(let i=a.length-1;i>0;i--){
         const j = Math.floor(Math.random()*(i+1));
-        [a[i], a[j]] = [a[j], a[i]];
+        [a[i],a[j]]=[a[j],a[i]];
       }
       return a;
     }
 
     function pickWord(){
-      const list = NOUNS.filter(w => w && typeof w === "string" && w.trim().length > 0);
+      const list = NOUNS.filter(w => w && typeof w==="string" && w.trim().length>0);
       return list[Math.floor(Math.random()*list.length)].trim();
     }
 
@@ -533,7 +486,6 @@
       if(state.impostors < 0) state.impostors = 0;
     }
 
-    /* Sheets */
     function openSheet(title, bodyEl){
       $("sheetTitle").textContent = title;
       const body = $("sheetBody");
@@ -549,7 +501,6 @@
 
     function playersSheet(){
       const wrap = document.createElement("div");
-
       const row = document.createElement("div");
       row.className = "row";
       row.innerHTML = `
@@ -580,16 +531,13 @@
         state.players.forEach((p, idx) => {
           const chip = document.createElement("div");
           chip.className = "chip";
-
           const nameSpan = document.createElement("span");
           nameSpan.textContent = p.name;
-
           const del = document.createElement("button");
           del.className = "x";
           del.type = "button";
           del.textContent = "Borrar";
           del.onclick = () => { state.players.splice(idx,1); renderList(); updateBadges(); };
-
           chip.appendChild(nameSpan);
           chip.appendChild(del);
           list.appendChild(chip);
@@ -598,7 +546,7 @@
 
       function add(){
         const inp = wrap.querySelector("#playerInput");
-        let name = (inp.value||"").trim().replace(/\s+/g," ");
+        const name = (inp.value||"").trim().replace(/\s+/g," ");
         if(!name) return;
         if(state.players.some(p => p.name === name)) return;
         state.players.push({ name });
@@ -608,7 +556,7 @@
       }
 
       wrap.querySelector("#addBtn").onclick = add;
-      wrap.querySelector("#playerInput").addEventListener("keydown", (e)=>{ if(e.key==="Enter") add(); });
+      wrap.querySelector("#playerInput").addEventListener("keydown",(e)=>{ if(e.key==="Enter") add(); });
 
       renderList();
       openSheet("Jugadores", wrap);
@@ -647,9 +595,7 @@
       const story = document.createElement("div");
       story.className = "hint";
       story.innerHTML = `
-        <div style="font-weight:950;color:var(--ink);margin-bottom:8px;">
-          📖 Historia rápida
-        </div>
+        <div style="font-weight:950;color:var(--ink);margin-bottom:8px;">📖 Historia rápida</div>
         En una fiesta del <b>Club de Campo de las Sandías más exquisitas</b>, alguien ha entrado por el
         <b>muro de atrás</b>. No es socio. No trae invitación. Y viene a colarse entre vosotros.
         <br><br>
@@ -663,24 +609,19 @@
         <div style="font-weight:950;color:var(--ink);margin:14px 0 8px;">📜 Reglas</div>
         <b>1.</b> Introduce los <b>jugadores</b>.<br>
         <b>2.</b> Indica cuántos <b>impostores</b> habrá.<br>
-        <b>3.</b> Pasad el móvil uno a uno. Cada jugador toca su carta y ve su mensaje:
-        los jugadores ven una <b>palabra</b> + <b>sandía</b>, el impostor solo ve <b>IMPOSTOR</b> + su icono.<br>
-        <b>4.</b> Empieza quien indique la app, y se sigue en el sentido de las agujas del reloj. ⏱️<br>
-        <b>5.</b> En tu turno, di una palabra relacionada con la palabra secreta… pero <b>no demasiado obvia</b>,
-        para que el impostor no la adivine a la primera.<br>
-        <b>6.</b> El impostor debe <b>evitar ser identificado</b>: dirá una palabra “farol” guiándose por lo que escucha.<br>
-        <b>7.</b> Tras la 1ª ronda, en la cuenta de 3, todos señalan al sospechoso. Si el más votado es impostor, queda eliminado.
-        Si solo había 1 impostor, el juego termina. Si había más, continuáis.<br>
-        <b>8.</b> Desde la 2ª ronda, el impostor puede gastar su turno para decir:
-        <i>“Soy el impostor y creo que la palabra es…”</i>. Si acierta, gana. Si falla, queda delatado y pierde.
-        Si quedan más impostores, el juego sigue.
+        <b>3.</b> Pasad el móvil uno a uno. Cada jugador toca su carta y ve su palabra.
+        El impostor solo ve <b>IMPOSTOR</b>.<br>
+        <b>4.</b> Empieza quien indique la app, y se sigue en el sentido de las agujas del reloj.<br>
+        <b>5.</b> En tu turno, di una palabra relacionada… pero no demasiado obvia.<br>
+        <b>6.</b> El impostor lanza un farol guiándose por lo que escucha.<br>
+        <b>7.</b> Tras la 1ª ronda: a la de 3, votación. Si el más votado es impostor, eliminado. Si había más, continuáis.<br>
+        <b>8.</b> Desde la 2ª ronda, el impostor puede intentar adivinar la palabra. Si acierta, gana; si falla, pierde.
       `;
       wrap.appendChild(rules);
 
       openSheet("Instrucciones", wrap);
     }
 
-    /* Juego */
     function canStart(){
       if(state.players.length < 3){ setWarn("Añade al menos 3 jugadores."); return false; }
       if(state.impostors < 1){ setWarn("Pon al menos 1 impostor."); return false; }
@@ -697,7 +638,7 @@
       const impostorSet = new Set(idxs);
 
       state.game = {
-        phase: "deal", // "deal" | "starter"
+        phase: "deal",
         order,
         word,
         impostorSet,
@@ -717,19 +658,13 @@
       else front.classList.remove("starterFace");
     }
 
-    function clearBackSensitive(){
-      $("wordText").textContent = "—";
-      $("emojiImg").src = "sandia.png";
-      $("emojiImg").alt = "Sandía";
-    }
-
     function renderFront(){
       const g = state.game;
       if(!g) return;
 
       $("flipCard").classList.remove("flipped");
       g.flipped = false;
-      clearBackSensitive();
+      $("wordText").textContent = "—";
 
       if(g.phase === "deal"){
         setStarterMode(false);
@@ -752,8 +687,7 @@
 
       if(g.phase === "starter"){
         setStarterMode(true);
-        const p = g.starter;
-        $("frontName").textContent = p.name;
+        $("frontName").textContent = g.starter.name;
         $("frontSub").textContent = "Empieza la partida (toca para cerrar)";
       }
     }
@@ -764,10 +698,7 @@
 
       const i = g.idx;
       const isImp = g.impostorSet.has(i);
-
       $("wordText").textContent = isImp ? "IMPOSTOR" : g.word;
-      $("emojiImg").src = isImp ? "impostor.png" : "sandia.png";
-      $("emojiImg").alt = isImp ? "Impostor" : "Sandía";
     }
 
     function flipOrNext(){
@@ -809,11 +740,9 @@
       clampImpostors();
       updateBadges();
       setStarterMode(false);
-      // cierra overlays si estuvieran
       $("overlay").classList.remove("show");
     }
 
-    /* Eventos */
     $("btnPlayers").onclick = playersSheet;
     $("btnImpostors").onclick = impostorsSheet;
     $("btnPlay").onclick = startGame;
@@ -822,13 +751,20 @@
     $("resetBtn").onclick = resetAll;
 
     $("closeSheetBtn").onclick = closeSheet;
-    $("overlay").addEventListener("click", (e)=>{ if(e.target === $("overlay")) closeSheet(); });
+    $("overlay").addEventListener("click",(e)=>{ if(e.target === $("overlay")) closeSheet(); });
 
     $("flipCard").addEventListener("click", flipOrNext);
     $("closeGameBtn").onclick = closeGame;
 
     clampImpostors();
     updateBadges();
+
+    // Service Worker (si existe sw.js)
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(()=>{});
+      });
+    }
   </script>
 </body>
 </html>
